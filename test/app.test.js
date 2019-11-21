@@ -5,7 +5,6 @@ const app = require('../lib/app');
 const connect = require('../lib/utils/connect');
 const mongoose = require('mongoose');
 const User = require('../lib/models/User');
-const Meme = require('../lib/models/Meme');
 
 describe('app routes', () => {
   beforeAll(() => {
@@ -101,6 +100,38 @@ describe('app routes', () => {
           bottomText: 'is this working',
           url: 'https://i.imgflip.com/345v97.jpg'
         });
+      });
+      
+  });
+
+  it('can get memes', async() => {
+    await User.create({ username: 'testy', password: 'test' });
+    await request(app)
+      .post('/api/auth/signin')
+      .send({ username: 'testy', password: 'test' });
+    await request(app)
+      .post('/api/meme')
+      .send({ topText: 'testing meme', bottomText: 'is this working', url: 'https://i.imgflip.com/345v97.jpg' });
+    await request(app)
+      .post('/api/meme')
+      .send({ topText: 'testing meme two', bottomText: 'testy test test', url: 'https://i.imgflip.com/345v97.jpg' });
+    return request(app)
+      .get('/api/meme')
+      .then(res => {
+        expect(res.body).toEqual([{
+          _id: expect.any(String),
+          __v: 0,
+          topText: 'testing meme',
+          bottomText: 'is this working',
+          url: 'https://i.imgflip.com/345v97.jpg'
+        }, {
+          _id: expect.any(String),
+          __v: 0,
+          topText: 'testing meme two',
+          bottomText: 'testy test test',
+          url: 'https://i.imgflip.com/345v97.jpg'
+        }
+        ]);
       });
       
   });
